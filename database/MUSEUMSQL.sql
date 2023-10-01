@@ -1,0 +1,79 @@
+use ART_OBJECT;
+
+-- QUESTION 1: SHOW ALL TABLES AND EXPLAIN HOW THEY ARE RELATED TO ONE ANOTHER
+SHOW TABLES;
+-- The tables ART, PAINTING, SCULPTURE, STATUE, OTHER, EXHIBITION, PERMANENT, and BORROWED can be related with the primary key: ID_Num.
+-- The tables ART and ARTIST are related with the name of the artist that created the body of work.
+-- The tables COLLECTION and EXHIBITION are related with the name of the exhibition.
+
+
+-- QUESTION 2: A BASIC RETRIVAL QUARY
+SELECT ART.Title, ARTIST.Name_
+FROM ART, ARTIST
+WHERE ART.Name_ = ARTIST.Name_;
+
+
+-- QUESTION 3: A RETRIVAL QUARY WITH ORDERED RESULTS
+SELECT Name_, DateBorn
+FROM ARTIST
+ORDER BY ARTIST.DateBorn ASC;
+
+
+-- QUESTION 4: A NESTED RETRIEVAL QUERY
+SELECT A.Title, A.Name_
+FROM ART AS A
+WHERE ID_Num IN (
+	SELECT E.ID_Num
+    FROM EXHIBITION AS E
+    WHERE EndDate LIKE '% 2023'
+	);
+
+-- QUESTION 5: A RETRIEVAL QUERY USING JOINED TABLES
+SELECT ART.Title, SCULPTURE.Style, SCULPTURE.Weight, SCULPTURE.Height, SCULPTURE.Material
+FROM SCULPTURE
+JOIN ART ON SCULPTURE.ID_Num = ART.ID_Num;
+
+-- QUESTION 6: AN UPDATE OPERATION WITH ANY NECCESSARY TRIGGERS
+DROP TABLE IF EXISTS updateInformation;
+CREATE TABLE updateInformation (update_occurred VARCHAR(50));
+
+DROP TRIGGER IF EXISTS update_time;
+DELIMITER **
+CREATE TRIGGER update_time
+AFTER UPDATE ON artist
+FOR EACH ROW
+BEGIN
+INSERT INTO updateInformation
+values(CURRENT_TIMESTAMP);
+END **
+DELIMITER ;
+
+UPDATE artist
+SET Name_ = 'Picasso' , DateBorn = 1600
+WHERE DateBorn = 1805 AND DateDied = 1875;
+
+SELECT *
+FROM updateInformation;
+
+-- QUESTION 7: A DELETION OPERATION WITH ANY NECCESSARY TRIGGERS
+
+DROP TABLE IF EXISTS deletionInformation;
+CREATE TABLE deletionInformation (deletion_occurred VARCHAR(50));
+
+DROP TRIGGER IF EXISTS delete_time;
+DELIMITER **
+CREATE TRIGGER delete_time
+AFTER UPDATE ON artist
+FOR EACH ROW
+BEGIN
+INSERT INTO deletionInformation
+values(CURRENT_TIMESTAMP);
+END **
+DELIMITER ;
+
+DELETE FROM artist
+WHERE DateBorn = 1566 AND DateDied = 1651;
+
+SELECT *
+FROM deletionInformation;
+
